@@ -81,8 +81,7 @@ Santiago Pontevedra 64
 Pontevedra Orense 119
 Orense Zamora 259
 
-Straight line Distances (to valladolid)
-
+SLD 
 Almeria 571
 Granada 507
 Jaen 439
