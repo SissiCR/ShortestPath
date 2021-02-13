@@ -1,8 +1,11 @@
+from queue import Queue
+import time
+
 class City:
   def __init__(self, name):
     self.name = name
     self.neighbors = []
-    self.sldToValladolid = [] # straight line distance (sld)
+    self.sldToValladolid = [] # straight line distance (sld) a Neighbor object 
 
 class Neighbor:
   def __init__(self, city, distance):
@@ -10,9 +13,47 @@ class Neighbor:
     self.distance = distance
 
 
-class graph:
+class Graph:
     def __init__(self, cities):
       self.graph = cities
+      self.pathCost = 0
+      self.path = []
+
+    def greedyFirstSearch(self):
+        queue = Queue(0)       
+        startCity = self.findCity('Malaga')
+        goalCity = self.findCity('Valladolid')
+        
+        if len(self.path) == 0:           
+            nextCity = Neighbor(startCity, 0)
+            self.path.append(nextCity)
+
+        while nextCity.city is not goalCity:
+            #print('....', nextCity.city.name, '....')
+            sortedCities = sorted(nextCity.city.neighbors, key = lambda x: x.city.sldToValladolid[0].distance, reverse = False )
+            for c in sortedCities:
+                if c.city is goalCity:
+                    queue.queue.clear()
+                    queue.put(c)
+                    break
+                if c not in self.path: #avoid loops
+                    if len(c.city.neighbors) is not 0: #dead end
+                       queue.put(c) # if the queue does not have nodes, return to the last node in the path and select another node
+            nextCity = queue.get()
+            self.path.append(nextCity)
+            queue.queue.clear()
+        for c in self.path:
+            self.pathCost = self.pathCost + c.distance
+            #print(c.city.name, c.distance)
+        #print(self.pathCost)
+        #for x in list(queue.queue):
+            #print(x.city.name)
+
+    def findCity(self, cityName):
+         for c in self.graph:
+            if cityName == c.name:
+                return c      
+         return False
 
 
 def main():
@@ -47,7 +88,7 @@ def main():
                            cities.append(City(distances[0]))
                       if findCity(distances[1]) == False:
                           cities.append(City(distances[1]))
-                      createNeighbor(findCity(distances[0]), findCity(distances[1]), distances[2])             
+                      createNeighbor(findCity(distances[0]), findCity(distances[1]), int(distances[2]))             
 
             for sl in range(z, len(content)):
                 sld = content[sl].split()
@@ -63,20 +104,15 @@ def main():
  
         
     retrieveCitiesFromFile()
-
-   # root = Tree()
-
-    #t = time.process_time()
-    #root.bfSearch(allItems, maxWeight)
-    #elapsedTime = time.process_time() - t
-    #print('Time for BFS is:', elapsedTime)
-    #root.bestBenefit.printInfo()
-    #print('....................................................')
-    #startTime = time.process_time()
-    #root.dfSearch(allItems, maxWeight)
-    #totalTime = time.process_time() - startTime
-    #print('Time for DFS is:', totalTime)
-    #root.bestBenefit.printInfo()
+    g = Graph(cities)
+    start = time.process_time()
+    g.greedyFirstSearch()
+    end = time.process_time() - start
+    print('......Distances......')
+    for c in range(0, len(g.path) - 1):
+       print(g.path[c].city.name,'',g.path[c + 1].city.name, '=',  g.path[c + 1].distance )
+    print('*Pathcost =', g.pathCost)
+    print('*Time elapsed =', end)
 
     
 if __name__=="__main__": 
