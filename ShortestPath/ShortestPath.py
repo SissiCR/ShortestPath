@@ -49,6 +49,46 @@ class Graph:
         #for x in list(queue.queue):
             #print(x.city.name)
 
+    def AStarSearch(self):
+        queue = Queue(0)       
+        startCity = self.findCity('Malaga')
+        goalCity = self.findCity('Valladolid')
+        
+        if len(self.path) == 0:           
+            nextCity = Neighbor(startCity, 0)
+            self.path.append(nextCity)
+
+        while nextCity.city is not goalCity:
+           # print('....', nextCity.city.name, nextCity.city.sldToValladolid[0].distance, '....')
+            sortedCities = sorted(nextCity.city.neighbors, key = lambda x: self.findSLD(x, goalCity) + x.distance, reverse = False )
+            for c in sortedCities:               
+                if  self.isCityInPath(c.city) == False: #avoid loops
+                    if len(c.city.neighbors) is not 0: #dead end
+                            if nextCity.city.sldToValladolid[0].distance <= c.city.sldToValladolid[0].distance + c.distance: #villkor
+                                 queue.put(c) # if the queue does not have nodes, return to the last node in the path and select another node
+                #print(c.city.name, self.findSLDIndex(c, goalCity) + c.distance)              
+            nextCity = queue.get()
+            self.path.append(nextCity)
+
+            queue.queue.clear()
+        for c in self.path:
+            self.pathCost = self.pathCost + c.distance
+        return
+
+    def findSLD(self, neighbor, goal):
+        for x in neighbor.city.sldToValladolid:
+            if x.city == goal:
+                d = x.distance
+                c = d
+                return x.distance
+
+
+    def isCityInPath(self, city):
+       for x in self.path:
+           if x.city == city:
+               return True
+       return False     
+
     def findCity(self, cityName):
          for c in self.graph:
             if cityName == c.name:
@@ -106,7 +146,8 @@ def main():
     retrieveCitiesFromFile()
     g = Graph(cities)
     start = time.process_time()
-    g.greedyFirstSearch()
+    #g.greedyFirstSearch()
+    g.AStarSearch()
     end = time.process_time() - start
     print('......Distances......')
     for c in range(0, len(g.path) - 1):
